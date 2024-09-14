@@ -1,0 +1,101 @@
+const { Command } = require('cmnd');
+const inquirer = require('inquirer');
+const colors = require('colors/safe');
+
+class PlanFlightCommand extends Command {
+
+  constructor() {
+    super('planflight');
+  }
+
+  help () {
+    return {
+      description: 'Planeja um novo voo para o piloto',
+      args: [],
+      flags: {},
+      vflags: {}
+    };
+  }
+
+  async run (params) {
+    
+    // Simulação de informações de voo sem APIs externas
+    let flightDetails = await inquirer.prompt([
+      {
+        name: 'origin',
+        type: 'input',
+        message: 'Informe o código ICAO do aeroporto de origem (ex: SBGR)',
+        validate: v => {
+          if (!v.match(/^[A-Z]{4}$/)) {
+            return 'Deve ser um código ICAO válido de 4 letras';
+          } else {
+            return true;
+          }
+        }
+      },
+      {
+        name: 'destination',
+        type: 'input',
+        message: 'Informe o código ICAO do aeroporto de destino (ex: KJFK)',
+        validate: v => {
+          if (!v.match(/^[A-Z]{4}$/)) {
+            return 'Deve ser um código ICAO válido de 4 letras';
+          } else {
+            return true;
+          }
+        }
+      },
+      {
+        name: 'altitude',
+        type: 'input',
+        message: 'Informe a altitude de cruzeiro desejada (em pés)',
+        validate: v => {
+          let alt = parseInt(v);
+          if (isNaN(alt) || alt < 1000 || alt > 45000) {
+            return 'A altitude deve ser um valor entre 1.000 e 45.000 pés';
+          } else {
+            return true;
+          }
+        }
+      },
+      {
+        name: 'fuel',
+        type: 'input',
+        message: 'Quantidade de combustível para o voo (em litros)',
+        validate: v => {
+          let fuel = parseInt(v);
+          if (isNaN(fuel) || fuel <= 0) {
+            return 'A quantidade de combustível deve ser um número positivo';
+          } else {
+            return true;
+          }
+        }
+      }
+    ]);
+
+    console.log();
+    console.log(colors.bold(`Voo planejado com sucesso!`));
+    console.log(`${colors.bold('Origem')}: ${flightDetails.origin}`);
+    console.log(`${colors.bold('Destino')}: ${flightDetails.destination}`);
+    console.log(`${colors.bold('Altitude de cruzeiro')}: ${flightDetails.altitude} pés`);
+    console.log(`${colors.bold('Combustível')}: ${flightDetails.fuel} litros`);
+
+    // Simulando a distância de voo com base nas coordenadas ICAO (simplificado)
+    let distance = Math.floor(Math.random() * (5000 - 300) + 300); // Gerar distância entre 300 e 5000 km
+
+    console.log(`${colors.bold('Distância estimada do voo')}: ${distance} km`);
+
+    // Simulação de consumo de combustível com base na distância e altitude
+    let fuelConsumption = Math.floor(distance / 10) + (flightDetails.altitude / 10000 * 50);
+    console.log(`${colors.bold('Consumo estimado de combustível')}: ${fuelConsumption} litros`);
+
+    // Verificar se o combustível é suficiente
+    if (fuelConsumption > flightDetails.fuel) {
+      console.log(colors.red(`Atenção: o combustível informado não é suficiente para completar o voo!`));
+    } else {
+      console.log(colors.green(`Combustível suficiente. Voo pronto para decolar!`));
+    }
+  }
+}
+
+module.exports = PlanFlightCommand;
